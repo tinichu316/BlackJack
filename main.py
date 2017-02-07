@@ -8,6 +8,12 @@ cardsDealt = 0
 hand = []
 houseHand = []
 
+#below 19 means the value to add per hand value below 19 to continue hitting.
+#above 18 means the value to minus per hand value above 18 to stop hitting
+#rand deviation means the standard deviation centered at 0 to stop or continue hitting
+AIWeights = {"below19": 0.04, "above18" : 0.2, 'randDeviation' : 0.04}
+
+
 def generateCards():
     """Populates the deck so I don't have to manually type out all 52 cards."""
     cards = []
@@ -75,6 +81,60 @@ def numberDuplicates(num, nums):
         k.remove(num)
     return duplicates
 
+def hasAces(hand):
+    return any(card[0] == "Ace" for card in hand)
+
+def chanceBustorStay(value, guessNextProbabilities): #no aces in hand
+    chanceB = 0.00
+    chanceS = 0.00
+    # we need both probabilities since the percentages don't add up to 1 (we don't know the player's hand)
+    for i in guessNextProbabilities:
+        if value < 11:
+            chanceB = 0.00
+            chanceS = 1.00
+        elif value + i[0] > 21:
+            chanceB += i[1]
+        else:
+            chanceS += i[1]
+    print("The chance of busting is {}. The chance of staying is {}.".format(chanceB, chanceS))
+    return chanceB, chanceS
+
+def holdorStay(hand, guessNextValue):
+    weights = AIWeights
+    #Now for determining whether or not to hold or stand:
+    value = getValue(hand)[0]
+    #should add a modifier based on current value.
+    modifier = 0.00
+    if value < 19:
+        modifier += weights['below19']*(18-value) #lower the value, higher the modifier
+    else:
+        modifier += -0.80 + (21-value)*weights['above18']
+    print("The modifier is: ", modifier)
+
+    randModifier = random.normalvariate(0, weights['randDeviation'])
+    print("The random modifier is: ", randModifier)
+
+    if hasAces(hand):
+        total = 0
+        for card in hand:
+            if card[0] in ['Jack', 'Queen', 'King']:
+                total += 10
+            elif card[0] == 'Ace':
+                    total += 1
+            else:
+                total += int(card[0])
+        bust, stay = chanceBustorStay(total, guessNextValue)
+        if bust > stay + modifier + randModifier: #will be likely to bust
+            return "stay"
+        else:
+            return "hit"
+    else:
+        bust, stay = chanceBustorStay(value, guessNextValue)
+        if bust > stay + modifier + randModifier: #will be likely to bust
+            return "stay"
+        else:
+            return "hit"
+
 def houseAI(hand):
     """Decides the perceived best move, with some randomness, whether it is to stand or hit."""
     #AIWeights = {'duplicates': {0: (0.45,0.60), 1: (0.25,0.35), 2:(0.05,0.10), 3: 0}}
@@ -106,8 +166,7 @@ def houseAI(hand):
     for i in guessNextValue:
         print("Card {}. Probability: {:.3f}%".format(numbers[i[0] - 1], i[1]))
 
-    #Now for determining whether or not to hold or stand:
-
+    return holdorStay(hand,guessNextValue)
 
 
 
@@ -125,7 +184,11 @@ deal(houseHand, currentDeck)
 deal(houseHand, currentDeck)
 printValue(houseHand)
 print("Dealer has: ", houseHand)
-houseAI(houseHand)
+print(houseAI(houseHand))
+deal(houseHand, currentDeck)
+printValue(houseHand)
+print(houseAI(houseHand))
+
 
 
 
