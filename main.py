@@ -4,6 +4,7 @@ import random
 isVictory = False
 suits = ['Spades', 'Clubs', 'Diamonds', 'Hearts']
 numbers = ['Ace','2','3','4','5','6','7','8','9','10','Jack','Queen','King']
+cardsDealt = 0
 hand = []
 houseHand = []
 
@@ -21,7 +22,10 @@ def shuffle(cards):
 
 def deal(hand, deck):
     """Deals one card to the player"""
+    global cardsDealt
     hand.append(deck.pop(0))
+    cardsDealt += 1
+
 
 def newRound():
     """Resets the deck."""
@@ -37,7 +41,11 @@ def getValue(hand):
         if hand[i][0] == 'Ace':
             hand.append(hand[i])
             del hand[i]
-            numberAces += 1
+
+    while hand[-i][0] == 'Ace' and i < len(hand):
+        numberAces = i
+        i += 1
+
     for card in hand:
         if card[0] in ['Jack', 'Queen', 'King']:
             total += 10
@@ -53,12 +61,14 @@ def getValue(hand):
 
 
 def printValue(hand):
-    total, handStr = getValue(hand)[0], getValue(hand)[1]
+    total, handStr = getValue(hand)
     print("Your hand: [" + handStr + "]")
     print("Value: {}".format(total))
 
 def numberDuplicates(num, nums):
-    duplicates, k = 0, nums
+    duplicates, k = 0, []
+    for i in nums:
+        k.append(i)
     k.remove(num)
     while num in k:
         duplicates += 1
@@ -66,11 +76,14 @@ def numberDuplicates(num, nums):
     return duplicates
 
 def houseAI(hand):
-    """Decides the correct move to play, with some randomness, whether it is to stand or hit."""
-    value = getValue(hand)[0]
+    """Decides the perceived best move, with some randomness, whether it is to stand or hit."""
+    #AIWeights = {'duplicates': {0: (0.45,0.60), 1: (0.25,0.35), 2:(0.05,0.10), 3: 0}}
+
+    guessNextValue = list(range(1,14)) #The range of values (card values aka king = 13) of the next possible card with a respective possibility
+    guessNextValue = [list(a) for a in zip(guessNextValue, [4/52]*len(guessNextValue))] #makes the probabilities a list of 2 item lists, also resets it and recalculates it
+    value = getValue(hand)[0] #current point value
     #sees if there are any multiples in the hand
-    multiplesWeight = 0.0 #
-    cardValues = []
+    cardValues = [] #values of all the cards in the hand (card numbers 1-13)
     for card in hand:
         if card[0] in ['Jack', 'Queen', 'King']:
             cardV = (['Jack', 'Queen', 'King'].index(card[0]) + 11)
@@ -81,9 +94,19 @@ def houseAI(hand):
         cardValues.append(cardV)
 
     for num in cardValues:
-        if numberDuplicates(num, cardValues) > 0:
+        #each card that we have we want to reduce the percieved probability of drawing another card of that type
+        dupes = numberDuplicates(num, cardValues)
+        guessNextValue[num - 1][1] = (3 - dupes)/(52 - cardsDealt)
+    #recalculate the other percentages
+    for i in guessNextValue:
+        if i[0] not in cardValues: #the house does not have this card, increase the likelyhood of drawing it
+            i[1] = 4/(52 - cardsDealt)
 
+    #Just prints the probabilities out for debugging purposes.
+    for i in guessNextValue:
+        print("Card {}. Probability: {:.3f}%".format(numbers[i[0] - 1], i[1]))
 
+    #Now for determining whether or not to hold or stand:
 
 
 
@@ -93,11 +116,16 @@ def houseAI(hand):
 
 
 currentDeck = newRound()
-print(currentDeck)
 deal(hand, currentDeck)
 deal(hand, currentDeck)
 printValue(hand)
-print(hand, currentDeck)
+print("You have: ", hand)
+
+deal(houseHand, currentDeck)
+deal(houseHand, currentDeck)
+printValue(houseHand)
+print("Dealer has: ", houseHand)
+houseAI(houseHand)
 
 
 
