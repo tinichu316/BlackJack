@@ -1,6 +1,9 @@
 import random
-percentWin = 0.44 #percent that it is NOTHING
-#0.44 found through many trials and tests.
+percentWin = 0.50 #percent that it is NOTHING
+#0.44 found through many trials and tests for default multiplier of 1
+#0.50 is good for 2x or nothing
+defaultMultiplier = 2
+
 
 # Could try to make this a simulation and run it a bunch with the user always tapping out at a certain multiplier and see the overall profit.
 wallet = 1000
@@ -149,7 +152,8 @@ def printMoney(amt):
 def printFiller():
     print("""=====================================================================================""")
 
-multiplier = 1
+multiplier = defaultMultiplier
+bet *= defaultMultiplier
 isPlaying = True
 
 while isPlaying:
@@ -166,16 +170,16 @@ while isPlaying:
         if luck > chance:
             multiplier *= 2
         else:
-            while multiplier > 1: #lose animation
+            while multiplier > defaultMultiplier: #lose animation
                 printMultiplier(multiplier)
                 multiplier -= 1
-            multiplier = 1
+            multiplier = defaultMultiplier
 
     elif resp == 'stop' or resp == 's':
-        if multiplier > 1:
+        if multiplier > defaultMultiplier:
             print("You have cashed out ${}!".format(bet*multiplier))
             wallet += bet*multiplier
-            multiplier = 1
+            multiplier = defaultMultiplier
         else:
             print("You have not put in any money! (Type 'quit' to exit)")
 

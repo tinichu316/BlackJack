@@ -1,15 +1,17 @@
 import random
+defaultMult = 2
 
 def simulateGame(multToStop, chanceNothing, bet, rounds ):
     initialWallet = 1000000 #1million
+    bet *= defaultMult
     wallet = initialWallet
     percentWin = chanceNothing
-    multiplier = 1
+    multiplier = defaultMult
     r = 0
     while r < rounds:
         if multiplier == multToStop:
             wallet += bet*multiplier
-            multiplier = 1
+            multiplier = defaultMult
             r += 1
         else:
             wallet -= bet
@@ -18,9 +20,9 @@ def simulateGame(multToStop, chanceNothing, bet, rounds ):
             if luck > chance:
                 multiplier *= 2
             else:
-                multiplier = 1
+                multiplier = defaultMult
     if multiplier > 1:
-        print("Final Cashout.")
+        #print("Final Cashout.")
         wallet += bet*multiplier
         
     #print("After {} rounds, cashing out at {}x, betting ${} at {}% to win..".format(r, multToStop, bet, 1-chanceNothing))
@@ -47,9 +49,9 @@ def changeMult(maxMult, timesEach, winPercent):
         print("{:>1} | {:1}".format(i[0], i[1]))
     return mults, profit
 
-for i in range(2):
-    print("At {}% lose chance,".format((i+438)/1000))
-    changeMult(128, 10, (i+438)/1000)      
+for i in range(10):
+    print("At {}% lose chance,".format((i+43)/100))
+    changeMult(128, 10, (i+43)/100)      
        
 #def changePercent(low, high):
     #tables = [0]*(high - low + 1)    

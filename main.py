@@ -43,14 +43,21 @@ def getValue(hand):
     total = 0
     numberAces = 0
     handStr = ""
+    aceIndexes = [] #indexes of the Aces so we can remove them later
     #moves the aces to the end for calculation sake
     for i in range(len(hand)):
         if hand[i][0] == 'Ace':
             hand.append(hand[i])
-            del hand[i]
-    while hand[-i][0] == 'Ace' and i < len(hand):
-        numberAces = i
-        i += 1
+            aceIndexes.append(i)
+    #removes the extra aces
+    for index in aceIndexes[::-1]:
+        del hand[index]
+    
+    #counts the number of aces
+    for x in range(len(hand)):
+        if hand[::-1][x][0] == 'Ace':
+            numberAces += 1
+
     for card in hand:
         if card[0] in ['Jack', 'Queen', 'King']:
             total += 10
@@ -199,18 +206,39 @@ def isBust(hand):
 def printFiller():
     print("""=====================================================================================""")
 
-isBetting = True
-
-while isBetting:
-    bet = input("How much would you like to bet per round? ($1-$100) ") #assuming its an int.
-    if bet.isdigit():
-        if int(bet) in range(1, 101):
-            bet = int(bet)
-            isBetting = False
-        else:
-            print("That number is not in the range!")
+def playAnotherRound():
+    print("Play another round?")
+    resp = input("[Player]: ")
+    if resp == "yes" or resp == 'y':
+        gameStart()
+        printFiller()
+    elif resp == 'bet' or resp == 'b':
+        bettingMode()
+        gameStart()
+        printFiller()
+    elif resp == "no" or resp == 'n':
+        exit()
     else:
-        print("That's not an integer number!")
+        playAnotherRound()
+
+def bettingMode():
+    global bet
+    isBetting = True
+    while isBetting:
+        bet = input("How much would you like to bet per round? ($1-$100) ") #assuming its an int.
+        if bet.isdigit():
+            if int(bet) in range(1, 101):
+                bet = int(bet)
+                isBetting = False
+            else:
+                print("That number is not in the range!")
+        else:
+            print("That's not an integer number!")
+
+bettingMode()
+
+
+
 
 gameStart()
 while wallet >= bet: #actually just goes forever right now
@@ -227,6 +255,7 @@ while wallet >= bet: #actually just goes forever right now
             printFiller()
             wallet -= (bet//2)
             print("You have surrendered this round! You lose half of your bet.")
+            printValue(houseHand, False)
             print("You still have [${}].".format(wallet))
             gameStart()
             printFiller()
@@ -247,15 +276,11 @@ while wallet >= bet: #actually just goes forever right now
                 deal(houseHand, currentDeck)
                 printValue(houseHand, False)
             if isBust(houseHand):  # If the house busts
-                print("Darn! I bust!")
-                print("Play another round?")
-                resp = input("[Player]: ")
-                if resp == "yes" or resp == 'y':
-                    gameStart()
-                    printFiller()
-                    break
-                else:
-                    break
+                wallet += bet
+                print("Darn! I bust! The money's yours.")
+                print("You still have [${}].".format(wallet))
+                playAnotherRound()
+
             else:
                 print("I will stay.")
                 printFiller()
@@ -275,13 +300,7 @@ while wallet >= bet: #actually just goes forever right now
                     wallet -= bet
                     print("Ouch, I guess a {} is bigger than a {} after all ;)".format(houseValue, playerValue))
                 print("You still have [${}].".format(wallet))
-                print("Play another round?")
-                resp = input("[Player]: ")
-                if resp == "yes" or resp == 'y':
-                    gameStart()
-                    printFiller()
-                elif resp == "no" or resp == 'n':
-                    break
+                playAnotherRound()
 
     else:
         printValue(hand, True)
@@ -289,12 +308,13 @@ while wallet >= bet: #actually just goes forever right now
         print("Ouch! looks like you busted!")
         printValue(houseHand, False)
         print("You still have [${}].".format(wallet))
-        print("Play another round?")
-        resp = input("[Player]: ")
-        if resp == "yes" or resp == 'y':
-            gameStart()
-        elif resp == "no" or resp == 'n':
-            break
+        playAnotherRound()
+
+
+
+
+#m = [['Ace', '♠'], ['Ace','♠'], ['Ace','♠']]
+#print(getValue(m))
 
 
 
