@@ -1,6 +1,16 @@
 import random
 defaultMult = 2
 
+def percentWinMult(percentWin, mult):
+    """Multiplies the percentage to win based on the current mult to make it more fun"""
+    if mult == 2:
+        #increase percentage by a bit
+        return percentWin - 0.10
+    elif mult == 4:
+        return percentWin - 0.05
+    else:
+        return percentWin - (mult/1000)
+
 def simulateGame(multToStop, chanceNothing, bet, rounds ):
     initialWallet = 1000000 #1million
     bet *= defaultMult
@@ -16,7 +26,7 @@ def simulateGame(multToStop, chanceNothing, bet, rounds ):
         else:
             wallet -= bet
             luck = random.randrange(0, 100001)
-            chance = int(percentWin * 100000)
+            chance = int(percentWinMult(percentWin, multiplier) *100000)
             if luck > chance:
                 multiplier *= 2
             else:
@@ -50,8 +60,8 @@ def changeMult(maxMult, timesEach, winPercent):
     return mults, profit
 
 for i in range(10):
-    print("At {}% lose chance,".format((i+43)/100))
-    changeMult(128, 10, (i+43)/100)      
+    print("At {}% lose chance,".format((i+48)/100))
+    changeMult(128, 10, (i+48)/100)   #mult to loop up to, number of times where it hits the mult, the win percentage   
        
 #def changePercent(low, high):
     #tables = [0]*(high - low + 1)    

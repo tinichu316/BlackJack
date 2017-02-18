@@ -135,6 +135,15 @@ def addPara(para1, para2):  # adds two characters together
     newChar = '\n'.join(newChar)
     return newChar
 
+def percentWinMult(percentWin, mult):
+    """Multiplies the percentage to win based on the current mult to make it more fun"""
+    if mult == 2:
+        #increase percentage by a bit
+        return percentWin - 0.08
+    elif mult == 4:
+        return percentWin - 0.04
+    else:
+        return percentWin - (mult/1000)
 
 def printMultiplier(mult):
     mult = str(mult)
@@ -166,7 +175,8 @@ while isPlaying:
     if resp == "go" or resp == 'g':
         wallet -= bet
         luck = random.randrange(0,100001)
-        chance = int(percentWin *100000)
+        chance = int(percentWinMult(percentWin, multiplier) *100000)
+        #print("Your current chance to win is: {}%".format(1.00 - percentWinMult(percentWin, multiplier)))
         if luck > chance:
             multiplier *= 2
         else:
